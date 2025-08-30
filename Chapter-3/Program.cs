@@ -1,5 +1,5 @@
 ﻿using Chapter_3.Events;
-using Chapter_3.Models;
+using Chapter_3.Processes;
 using Chapter_3.Steps;
 using Chapter_3.Steps.TestInputs;
 using Chapter_3.Utilities;
@@ -21,11 +21,22 @@ namespace Chapter_3
             KernelProcess kernelProcessSuccess = SetupAccountOpeningProcess<UserInputSuccessfulInteractionStep>();
             await using var runningProcessSuccess = await kernelProcessSuccess.StartAsync(kernel, new KernelProcessEvent() { Id = AccountOpeningEvents.StartProcess, Data = null });
 
-            KernelProcess kernelProcessCreditFailure = SetupAccountOpeningProcess<UserInputCreditScoreFailureInteractionStep>();
-            await using var runningProcessCreditFailure = await kernelProcessCreditFailure.StartAsync(kernel, new KernelProcessEvent() { Id = AccountOpeningEvents.StartProcess, Data = null });
+            //KernelProcess kernelProcessCreditFailure = SetupAccountOpeningProcess<UserInputCreditScoreFailureInteractionStep>();
+            //await using var runningProcessCreditFailure = await kernelProcessCreditFailure.StartAsync(kernel, new KernelProcessEvent() { Id = AccountOpeningEvents.StartProcess, Data = null });
 
-            KernelProcess kernelProcessFraudFailure = SetupAccountOpeningProcess<UserInputFraudFailureInteractionStep>();
-            await using var runningProcessFraudFailure = await kernelProcessFraudFailure.StartAsync(kernel, new KernelProcessEvent() { Id = AccountOpeningEvents.StartProcess, Data = null });
+            //KernelProcess kernelProcessFraudFailure = SetupAccountOpeningProcess<UserInputFraudFailureInteractionStep>();
+            //await using var runningProcessFraudFailure = await kernelProcessFraudFailure.StartAsync(kernel, new KernelProcessEvent() { Id = AccountOpeningEvents.StartProcess, Data = null });
+
+            //SubProcess
+            //KernelProcess kernelSubProcessSccess = SetupAccountOpeningWithSubProcess<UserInputSuccessfulInteractionStep>();
+            //await using var runningSubProcessSuccess = await kernelSubProcessSccess.StartAsync(kernel, new KernelProcessEvent() { Id = AccountOpeningEvents.StartProcess, Data = null });
+
+            //KernelProcess kernelSubProcessCreditFailure = SetupAccountOpeningProcess<UserInputCreditScoreFailureInteractionStep>();
+            //await using var runningSubProcessCreditFailure = await kernelSubProcessCreditFailure.StartAsync(kernel, new KernelProcessEvent() { Id = AccountOpeningEvents.StartProcess, Data = null });
+
+            //KernelProcess kernelSubProcessFraudFailure = SetupAccountOpeningProcess<UserInputFraudFailureInteractionStep>();
+            //await using var runningSubProcessFraudFailure = await kernelSubProcessFraudFailure.StartAsync(kernel, new KernelProcessEvent() { Id = AccountOpeningEvents.StartProcess, Data = null });
+
         }
 
         private static KernelProcess SetupAccountOpeningProcess<TUserInputStep>() where TUserInputStep : ScriptedUserInputStep
@@ -135,6 +146,90 @@ namespace Chapter_3
             welcomePacketStep
                 .OnEvent(AccountOpeningEvents.WelcomePacketCreated)
                 .SendEventTo(new ProcessFunctionTargetBuilder(mailServiceStep, functionName: MailServiceStep.ProcessStepFunctions.SendMailToUserWithDetails, parameterName: "message"));
+
+            // All possible paths end up with the user being notified about the account creation decision throw the mailServiceStep completion
+            mailServiceStep
+                .OnEvent(AccountOpeningEvents.MailServiceSent)
+                .StopProcess();
+
+            KernelProcess kernelProcess = process.Build();
+
+            return kernelProcess;
+        }
+
+        private static KernelProcess SetupAccountOpeningWithSubProcess<TUserInputStep>() where TUserInputStep : ScriptedUserInputStep
+        {
+            ProcessBuilder process = new("AccountOpeningProcessWithSubprocesses");
+            var newCustomerFormStep = process.AddStepFromType<CompleteNewCustomerFormStep>();
+            var userInputStep = process.AddStepFromType<TUserInputStep>();
+            var displayAssistantMessageStep = process.AddStepFromType<DisplayAssistantMessageStep>();
+
+            var accountVerificationStep = process.AddStepFromProcess(NewAccountVerificationProcess.CreateProcess());
+            var accountCreationStep = process.AddStepFromProcess(NewAccountCreationProcess.CreateProcess());
+
+            var mailServiceStep = process.AddStepFromType<MailServiceStep>();
+
+            process
+                .OnInputEvent(AccountOpeningEvents.StartProcess)
+                .SendEventTo(new ProcessFunctionTargetBuilder(newCustomerFormStep, CompleteNewCustomerFormStep.ProcessStepFunctions.NewAccountWelcome));
+
+            // When the welcome message is generated, send message to displayAssistantMessageStep
+            newCustomerFormStep
+                .OnEvent(AccountOpeningEvents.NewCustomerFormWelcomeMessageComplete)
+                .SendEventTo(new ProcessFunctionTargetBuilder(displayAssistantMessageStep, DisplayAssistantMessageStep.ProcessStepFunctions.DisplayAssistantMessage));
+
+            // When the userInput step emits a user input event, send it to the newCustomerForm step
+            // Function names are necessary when the step has multiple public functions like CompleteNewCustomerFormStep: NewAccountWelcome and NewAccountProcessUserInfo
+            userInputStep
+                .OnEvent(CommonEvents.UserInputReceived)
+                .SendEventTo(new ProcessFunctionTargetBuilder(newCustomerFormStep, CompleteNewCustomerFormStep.ProcessStepFunctions.NewAccountProcessUserInfo, "userMessage"));
+
+            userInputStep
+                .OnEvent(CommonEvents.Exit)
+                .StopProcess();
+
+            // When the newCustomerForm step emits needs more details, send message to displayAssistantMessage step
+            newCustomerFormStep
+                .OnEvent(AccountOpeningEvents.NewCustomerFormNeedsMoreDetails)
+                .SendEventTo(new ProcessFunctionTargetBuilder(displayAssistantMessageStep, DisplayAssistantMessageStep.ProcessStepFunctions.DisplayAssistantMessage));
+
+            // After any assistant message is displayed, user input is expected to the next step is the userInputStep
+            displayAssistantMessageStep
+                .OnEvent(CommonEvents.AssistantResponseGenerated)
+                .SendEventTo(new ProcessFunctionTargetBuilder(userInputStep, ScriptedUserInputStep.ProcessStepFunctions.GetUserInput));
+
+            // When the newCustomerForm is completed...
+            newCustomerFormStep
+                .OnEvent(AccountOpeningEvents.NewCustomerFormCompleted)
+                // The information gets passed to the account verificatino step
+                .SendEventTo(accountVerificationStep.WhereInputEventIs(AccountOpeningEvents.NewCustomerFormCompleted))
+                // The information gets passed to the validation process step
+                .SendEventTo(accountCreationStep.WhereInputEventIs(AccountOpeningEvents.NewCustomerFormCompleted));
+
+            // When the newCustomerForm is completed, the user interaction transcript with the user is passed to the core system record creation step
+            newCustomerFormStep
+                .OnEvent(AccountOpeningEvents.CustomerInteractionTranscriptReady)
+                .SendEventTo(accountCreationStep.WhereInputEventIs(AccountOpeningEvents.CustomerInteractionTranscriptReady));
+
+            // When the creditScoreCheck step results in Rejection, the information gets to the mailService step to notify the user about the state of the application and the reasons
+            accountVerificationStep
+                .OnEvent(AccountOpeningEvents.CreditScoreCheckRejected)
+                .SendEventTo(new ProcessFunctionTargetBuilder(mailServiceStep));
+
+            // When the fraudDetectionCheck step fails, the information gets to the mailService step to notify the user about the state of the application and the reasons
+            accountVerificationStep
+                .OnEvent(AccountOpeningEvents.FraudDetectionCheckFailed)
+                .SendEventTo(new ProcessFunctionTargetBuilder(mailServiceStep));
+
+            // When the fraudDetectionCheck step passes, the information gets to core system record creation step to kickstart this step
+            accountVerificationStep
+                .OnEvent(AccountOpeningEvents.FraudDetectionCheckPassed)
+                .SendEventTo(accountCreationStep.WhereInputEventIs(AccountOpeningEvents.NewAccountVerificationCheckPassed));
+
+            // After crmRecord and marketing gets created, a welcome packet is created to then send information to the user with the mailService step
+            accountCreationStep
+                .OnEvent(AccountOpeningEvents.WelcomePacketCreated)
+                .SendEventTo(new ProcessFunctionTargetBuilder(mailServiceStep));
 
             // All possible paths end up with the user being notified about the account creation decision throw the mailServiceStep completion
             mailServiceStep

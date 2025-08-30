@@ -4,8 +4,9 @@ using System.Text.Json.Serialization;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.ChatCompletion;
-using Microsoft.SemanticKernel.Connectors.OpenAI;
+using Microsoft.SemanticKernel.Connectors.Google;
 using Chapter_3.Models;
+using Chapter_3.Events;
 
 namespace Chapter_3.Steps;
 
@@ -70,13 +71,13 @@ public class CompleteNewCustomerFormStep : KernelProcessStep<NewCustomerFormStat
         // Creating another kernel that only makes use private functions to fill up the new customer form
         Kernel kernel = new(_baseKernel.Services);
         kernel.ImportPluginFromFunctions("FillForm", [
-            KernelFunctionFactory.CreateFromMethod(OnUserProvidedFirstName, functionName: nameof(OnUserProvidedFirstName)),
-            KernelFunctionFactory.CreateFromMethod(OnUserProvidedLastName, functionName: nameof(OnUserProvidedLastName)),
-            KernelFunctionFactory.CreateFromMethod(OnUserProvidedDOBDetails, functionName: nameof(OnUserProvidedDOBDetails)),
-            KernelFunctionFactory.CreateFromMethod(OnUserProvidedStateOfResidence, functionName: nameof(OnUserProvidedStateOfResidence)),
-            KernelFunctionFactory.CreateFromMethod(OnUserProvidedPhoneNumber, functionName: nameof(OnUserProvidedPhoneNumber)),
-            KernelFunctionFactory.CreateFromMethod(OnUserProvidedUserId, functionName: nameof(OnUserProvidedUserId)),
-            KernelFunctionFactory.CreateFromMethod(OnUserProvidedEmailAddress, functionName: nameof(OnUserProvidedEmailAddress)),
+            KernelFunctionFactory.CreateFromMethod(OnUserProvidedFirstNameAsync, functionName: nameof(OnUserProvidedFirstNameAsync)),
+            KernelFunctionFactory.CreateFromMethod(OnUserProvidedLastNameAsync, functionName: nameof(OnUserProvidedLastNameAsync)),
+            KernelFunctionFactory.CreateFromMethod(OnUserProvidedDOBDetailsAsync, functionName: nameof(OnUserProvidedDOBDetailsAsync)),
+            KernelFunctionFactory.CreateFromMethod(OnUserProvidedStateOfResidenceAsync, functionName: nameof(OnUserProvidedStateOfResidenceAsync)),
+            KernelFunctionFactory.CreateFromMethod(OnUserProvidedPhoneNumberAsync, functionName: nameof(OnUserProvidedPhoneNumberAsync)),
+            KernelFunctionFactory.CreateFromMethod(OnUserProvidedUserIdAsync, functionName: nameof(OnUserProvidedUserIdAsync)),
+            KernelFunctionFactory.CreateFromMethod(OnUserProvidedEmailAddressAsync, functionName: nameof(OnUserProvidedEmailAddressAsync)),
         ]);
 
         return kernel;
@@ -90,9 +91,9 @@ public class CompleteNewCustomerFormStep : KernelProcessStep<NewCustomerFormStat
 
         Kernel kernel = CreateNewCustomerFormKernel(_kernel);
 
-        OpenAIPromptExecutionSettings settings = new()
+        GeminiPromptExecutionSettings settings = new()
         {
-            ToolCallBehavior = ToolCallBehavior.AutoInvokeKernelFunctions,
+            ToolCallBehavior = GeminiToolCallBehavior.AutoInvokeKernelFunctions,
             Temperature = 0.7,
             MaxTokens = 2048
         };
@@ -126,7 +127,7 @@ public class CompleteNewCustomerFormStep : KernelProcessStep<NewCustomerFormStat
     }
 
     [Description("User provided details of first name")]
-    private Task OnUserProvidedFirstName(string firstName)
+    private Task OnUserProvidedFirstNameAsync(string firstName)
     {
         if (!string.IsNullOrEmpty(firstName) && _state != null)
         {
@@ -137,7 +138,7 @@ public class CompleteNewCustomerFormStep : KernelProcessStep<NewCustomerFormStat
     }
 
     [Description("User provided details of last name")]
-    private Task OnUserProvidedLastName(string lastName)
+    private Task OnUserProvidedLastNameAsync(string lastName)
     {
         if (!string.IsNullOrEmpty(lastName) && _state != null)
         {
@@ -148,7 +149,7 @@ public class CompleteNewCustomerFormStep : KernelProcessStep<NewCustomerFormStat
     }
 
     [Description("User provided details of USA State the user lives in, must be in 2-letter Uppercase State Abbreviation format")]
-    private Task OnUserProvidedStateOfResidence(string stateAbbreviation)
+    private Task OnUserProvidedStateOfResidenceAsync(string stateAbbreviation)
     {
         if (!string.IsNullOrEmpty(stateAbbreviation) && _state != null)
         {
@@ -159,7 +160,7 @@ public class CompleteNewCustomerFormStep : KernelProcessStep<NewCustomerFormStat
     }
 
     [Description("User provided details of date of birth, must be in the format MM/DD/YYYY")]
-    private Task OnUserProvidedDOBDetails(string date)
+    private Task OnUserProvidedDOBDetailsAsync(string date)
     {
         if (!string.IsNullOrEmpty(date) && _state != null)
         {
@@ -170,7 +171,7 @@ public class CompleteNewCustomerFormStep : KernelProcessStep<NewCustomerFormStat
     }
 
     [Description("User provided details of phone number, must be in the format (\\d{3})-\\d{3}-\\d{4}")]
-    private Task OnUserProvidedPhoneNumber(string phoneNumber)
+    private Task OnUserProvidedPhoneNumberAsync(string phoneNumber)
     {
         if (!string.IsNullOrEmpty(phoneNumber) && _state != null)
         {
@@ -181,7 +182,7 @@ public class CompleteNewCustomerFormStep : KernelProcessStep<NewCustomerFormStat
     }
 
     [Description("User provided details of userId, must be in the format \\d{3}-\\d{3}-\\d{4}")]
-    private Task OnUserProvidedUserId(string userId)
+    private Task OnUserProvidedUserIdAsync(string userId)
     {
         if (!string.IsNullOrEmpty(userId) && _state != null)
         {
@@ -192,7 +193,7 @@ public class CompleteNewCustomerFormStep : KernelProcessStep<NewCustomerFormStat
     }
 
     [Description("User provided email address, must be in the an email valid format")]
-    private Task OnUserProvidedEmailAddress(string emailAddress)
+    private Task OnUserProvidedEmailAddressAsync(string emailAddress)
     {
         if (!string.IsNullOrEmpty(emailAddress) && _state != null)
         {

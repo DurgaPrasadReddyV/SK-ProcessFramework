@@ -1,7 +1,7 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
 using Microsoft.SemanticKernel;
-using Chapter_3.Models;
+using Chapter_3.Events;
 
 namespace Chapter_3.Steps;
 

@@ -1,4 +1,4 @@
-﻿namespace Chapter_3.Models;
+﻿namespace Chapter_3.Events;
 
 /// <summary>
 /// Processes Events related to Account Opening scenarios.<br/>

@@ -9,13 +9,12 @@ using Temp.Steps.Functions;
 
 namespace Temp.Steps;
 
-public class DisplayRequestTypeSelectionAssistantMessageStep : KernelProcessStep
+public class DisplayRequestIntakeAssistantMessageStep : KernelProcessStep
 {
     [KernelFunction(DisplayAssistantMessageFunctions.ShowOnConsole)]
     public async ValueTask DisplayAssistantMessageAsync(KernelProcessStepContext context, string assistantMessage)
     {
-        Console.ForegroundColor = ConsoleColor.Blue;
-        Console.WriteLine();
+        Console.ForegroundColor = ConsoleColor.Green;
         Console.WriteLine($"ASSISTANT: {assistantMessage}\n");
         Console.ResetColor();
 

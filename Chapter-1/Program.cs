@@ -3,7 +3,7 @@ using Microsoft.SemanticKernel;
 
 namespace Chapter_1
 {
-    internal class Program
+    public class Program
     {
         public static class ProcessEvents
         {

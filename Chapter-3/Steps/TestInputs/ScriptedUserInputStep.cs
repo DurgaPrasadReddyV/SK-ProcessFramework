@@ -49,7 +49,7 @@ public class ScriptedUserInputStep : KernelProcessStep<UserInputState>
         return ValueTask.CompletedTask;
     }
 
-    internal string GetNextUserMessage()
+    public string GetNextUserMessage()
     {
         if (_state != null && _state.CurrentInputIndex >= 0 && _state.CurrentInputIndex < this._state.UserInputs.Count)
         {

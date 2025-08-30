@@ -4,7 +4,7 @@ using Microsoft.SemanticKernel;
 
 namespace IAM_Provisioning_Demo
 {
-    internal class Program
+    public class Program
     {
         static void Main(string[] args)
         {

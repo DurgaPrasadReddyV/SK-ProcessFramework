@@ -22,9 +22,9 @@ public class CompleteNewCustomerFormStep : KernelProcessStep<NewCustomerFormStat
         public const string NewAccountWelcome = nameof(NewAccountWelcome);
     }
 
-    internal NewCustomerFormState? _state;
+    public NewCustomerFormState? _state;
 
-    internal string _formCompletionSystemPrompt = """
+    public string _formCompletionSystemPrompt = """
         The goal is to fill up all the fields needed for a form.
         The user may provide information to fill up multiple fields of the form in one message.
         The user needs to fill up a form, all the fields of the form are necessary
@@ -43,7 +43,7 @@ public class CompleteNewCustomerFormStep : KernelProcessStep<NewCustomerFormStat
         - For date fields, confirm with the user first if the date format is not clear. Example 02/03 03/02 could be March 2nd or February 3rd.
         """;
 
-    internal string _welcomeMessage = """
+    public string _welcomeMessage = """
         Hello there, I can help you out fill out the information needed to open a new account with us.
         Please provide some personal information like first name and last name to get started.
         """;
@@ -209,6 +209,6 @@ public class CompleteNewCustomerFormStep : KernelProcessStep<NewCustomerFormStat
 /// </summary>
 public class NewCustomerFormState
 {
-    internal NewCustomerForm newCustomerForm { get; set; } = new();
-    internal List<ChatMessageContent> conversation { get; set; } = [];
+    public NewCustomerForm newCustomerForm { get; set; } = new();
+    public List<ChatMessageContent> conversation { get; set; } = [];
 }

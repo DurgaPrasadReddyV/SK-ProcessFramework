@@ -6,7 +6,7 @@ using Microsoft.SemanticKernel.Process.Tools;
 
 namespace Chapter_2
 {
-    internal class Program
+    public class Program
     {
         public static class ProcessEvents
         {

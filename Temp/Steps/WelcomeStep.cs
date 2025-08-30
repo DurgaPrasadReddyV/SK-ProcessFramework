@@ -19,7 +19,7 @@ namespace Temp.Steps;
 
 public sealed class WelcomeStep : KernelProcessStep<WelcomeState>
 {
-    internal string _welcomeMessage = """
+    public string _welcomeMessage = """
     Welcome! I'm here to help you provision user accounts and access permissions within active directory.
     
     I can assist you with the following tasks:
@@ -32,9 +32,9 @@ public sealed class WelcomeStep : KernelProcessStep<WelcomeState>
     Please let me know which option you'd like to work with to get started. Type 'exit' to leave the process at any time.
     """;
 
-    internal WelcomeState? _state;
+    public WelcomeState? _state;
 
-    internal string _requestTypeSelectionSystemPrompt = """
+    public string _requestTypeSelectionSystemPrompt = """
         You are a helpful assistant designed to guide users through selecting active directory objects creation options. Your role is to help users choose the most appropriate option from the following menu:
 
         1. Creating service accounts

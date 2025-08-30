@@ -13,5 +13,5 @@ namespace Chapter_2.States;
 /// </summary>
 public class ChatBotState
 {
-    internal ChatHistory ChatMessages { get; } = new();
+    public ChatHistory ChatMessages { get; } = new();
 }

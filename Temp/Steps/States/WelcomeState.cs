@@ -10,7 +10,7 @@ namespace Temp.Steps.States
 {
     public class WelcomeState
     {
-        internal RequestType RequestType { get; set; } = new();
-        internal List<ChatMessageContent> Conversation { get; set; } = [];
+        public RequestType RequestType { get; set; } = new();
+        public List<ChatMessageContent> Conversation { get; set; } = [];
     }
 }

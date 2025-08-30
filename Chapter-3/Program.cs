@@ -8,7 +8,7 @@ using Microsoft.SemanticKernel.Process.Tools;
 
 namespace Chapter_3
 {
-    internal class Program
+    public class Program
     {
         static async Task Main(string[] args)
         {

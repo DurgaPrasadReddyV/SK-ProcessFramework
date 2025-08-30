@@ -6,8 +6,9 @@ using System.Threading.Tasks;
 
 namespace Temp.Steps.Functions
 {
-    internal class RequestIntakeFunctions
+    public class RequestIntakeFunctions
     {
+        public const string RequestTypeCallout = nameof(RequestTypeCallout);
         public const string CompleteRequestForm = nameof(CompleteRequestForm);
     }
 }

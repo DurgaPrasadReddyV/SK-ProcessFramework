@@ -6,7 +6,7 @@ using Temp.Steps.Functions;
 
 namespace Temp
 {
-    internal class Program
+    public class Program
     {
         static async Task Main(string[] args)
         {
@@ -20,7 +20,9 @@ namespace Temp
             var requestTypeSelectionUserInputStep = process.AddStepFromType<RequestTypeSelectionUserInputStep>();
             var displayRequestTypeSelectionAssistantMessageStep = process.AddStepFromType<DisplayRequestTypeSelectionAssistantMessageStep>();
             var requestIntakeStep = process.AddStepFromType<RequestIntakeStep>();
-            
+            var requestIntakeUserInputStep = process.AddStepFromType<RequestIntakeUserInputStep>();
+            var displayRequestIntakeAssistantMessageStep = process.AddStepFromType<DisplayRequestIntakeAssistantMessageStep>();
+
             process.OnInputEvent(WelcomeEvents.StartProcess)
                 .SendEventTo(new ProcessFunctionTargetBuilder(welcomeStep, WelcomeFunctions.Greetings));
 
@@ -42,11 +44,31 @@ namespace Temp
 
             displayRequestTypeSelectionAssistantMessageStep
                 .OnEvent(DisplayAssistantMessageEvents.AssistantResponseGenerated)
-                .SendEventTo(new ProcessFunctionTargetBuilder(requestTypeSelectionUserInputStep, UserInputFunctions.GetUserInput, "callerName"));
+                .SendEventTo(new ProcessFunctionTargetBuilder(requestTypeSelectionUserInputStep, UserInputFunctions.GetUserInput));
 
             welcomeStep
                 .OnEvent(WelcomeEvents.RequestTypeSelectionComplete)
-                .SendEventTo(new ProcessFunctionTargetBuilder(requestIntakeStep, RequestIntakeFunctions.CompleteRequestForm, "requestType"));
+                .SendEventTo(new ProcessFunctionTargetBuilder(requestIntakeStep, RequestIntakeFunctions.RequestTypeCallout, "requestType"));
+
+            requestIntakeStep
+                .OnEvent(RequestIntakeEvents.RequestTypeCalloutComplete)
+                .SendEventTo(new ProcessFunctionTargetBuilder(displayRequestIntakeAssistantMessageStep, DisplayAssistantMessageFunctions.ShowOnConsole));
+
+            displayRequestIntakeAssistantMessageStep
+                .OnEvent(DisplayAssistantMessageEvents.AssistantResponseGenerated)
+                .SendEventTo(new ProcessFunctionTargetBuilder(requestIntakeUserInputStep, UserInputFunctions.GetUserInput));
+
+            requestIntakeUserInputStep
+                .OnEvent(UserInputEvents.UserInputReceived)
+                .SendEventTo(new ProcessFunctionTargetBuilder(requestIntakeStep, RequestIntakeFunctions.CompleteRequestForm, "userMessage"));
+
+            requestIntakeUserInputStep
+                .OnEvent(UserInputEvents.Exit)
+                .StopProcess();
+
+            requestIntakeStep
+               .OnEvent(RequestIntakeEvents.ServiceAccountRequestFormNeedsMoreDetails)
+               .SendEventTo(new ProcessFunctionTargetBuilder(displayRequestIntakeAssistantMessageStep, DisplayAssistantMessageFunctions.ShowOnConsole));
 
 
             // Build the process to get a handle that can be started

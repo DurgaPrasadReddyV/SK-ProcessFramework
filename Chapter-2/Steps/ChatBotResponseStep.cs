@@ -22,9 +22,9 @@ public class ChatBotResponseStep : KernelProcessStep<ChatBotState>
     }
 
     /// <summary>
-    /// The internal state object for the chat bot response step.
+    /// The public state object for the chat bot response step.
     /// </summary>
-    internal ChatBotState? _state;
+    public ChatBotState? _state;
 
     /// <summary>
     /// ActivateAsync is the place to initialize the state object for the step.

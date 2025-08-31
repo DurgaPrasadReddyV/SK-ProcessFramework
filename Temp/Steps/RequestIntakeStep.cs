@@ -143,7 +143,8 @@ public class RequestIntakeStep : KernelProcessStep<RequestIntakeState>
         // Creating another kernel that only makes use private functions to fill up the form
         Kernel kernel = new(_baseKernel.Services);
         kernel.ImportPluginFromFunctions("FillServiceAccountRequestForm", [
-        KernelFunctionFactory.CreateFromMethod(SetServiceAccountName, functionName: nameof(SetServiceAccountName))]);
+            KernelFunctionFactory.CreateFromMethod(SetServiceAccountName, functionName: nameof(SetServiceAccountName)),
+        KernelFunctionFactory.CreateFromMethod(SetServiceAppName, functionName: nameof(SetServiceAppName))]);
 
         return kernel;
     }
@@ -154,6 +155,15 @@ public class RequestIntakeStep : KernelProcessStep<RequestIntakeState>
         if (!string.IsNullOrEmpty(accountName) && _state != null)
         {
             _state.ServiceAccountRequest.AccountName = accountName;
+        }
+    }
+
+    [Description("User provided details of app name")]
+    private void SetServiceAppName(string appName)
+    {
+        if (!string.IsNullOrEmpty(appName) && _state != null)
+        {
+            _state.ServiceAccountRequest.AppName = appName;
         }
     }
 

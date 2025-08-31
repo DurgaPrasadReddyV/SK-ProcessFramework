@@ -10,10 +10,13 @@ namespace Temp.Models
 {
     public class ServiceAccountRequest
     {
-        Guid Id { get; set; } = Guid.NewGuid();
+        public Guid Id { get; set; } = Guid.NewGuid();
 
         [JsonPropertyName("accountName")]
         public string AccountName { get; set; } = string.Empty;
+
+        [JsonPropertyName("appName")]
+        public string AppName { get; set; } = string.Empty;
 
         public ServiceAccountRequest CopyWithDefaultValues(string defaultStringValue = "Unanswered")
         {
@@ -22,6 +25,10 @@ namespace Temp.Models
 
             foreach (PropertyInfo property in properties)
             {
+                // Exclude Id from being copied
+                if (property.Name == nameof(Id))
+                    continue;
+
                 // Get the value of the property  
                 string? value = property.GetValue(this) as string;
 

@@ -8,5 +8,7 @@ namespace Temp.Steps.Functions
 {
     public class ApprovalsGenerationFunctions
     {
+        public const string GenerateServiceAccountApprovals = nameof(GenerateServiceAccountApprovals);
+        public const string GenerateUserAccountApprovals = nameof(GenerateUserAccountApprovals);
     }
 }

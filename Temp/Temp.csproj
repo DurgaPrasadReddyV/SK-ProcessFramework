@@ -19,4 +19,10 @@
 		<PackageReference Include="PuppeteerSharp" Version="20.2.2" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <Reference Include="IAMBuddy.Domain">
+	    <HintPath>..\..\IAMBuddyNew\IAMBuddy\Domain\bin\Debug\net9.0\IAMBuddy.Domain.dll</HintPath>
+	  </Reference>
+	</ItemGroup>
+
 </Project>

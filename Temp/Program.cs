@@ -27,6 +27,7 @@ namespace Temp
             var requestIntakeStep = process.AddStepFromType<RequestIntakeStep>();
             var requestIntakeUserInputStep = process.AddStepFromType<RequestIntakeUserInputStep>();
             var displayRequestIntakeAssistantMessageStep = process.AddStepFromType<DisplayRequestIntakeAssistantMessageStep>();
+            var approvalsGenerationStep = process.AddStepFromType<ApprovalsGenerationStep>();
 
             process.OnInputEvent(WelcomeEvents.StartProcess)
                 .SendEventTo(new ProcessFunctionTargetBuilder(welcomeStep, WelcomeFunctions.Greetings));
@@ -79,8 +80,13 @@ namespace Temp
                .OnEvent(RequestIntakeEvents.UserAccountRequestFormNeedsMoreDetails)
                .SendEventTo(new ProcessFunctionTargetBuilder(displayRequestIntakeAssistantMessageStep, DisplayAssistantMessageFunctions.ShowOnConsole));
 
+            requestIntakeStep
+               .OnEvent(RequestIntakeEvents.ServiceAccountRequestFormComplete)
+               .SendEventTo(new ProcessFunctionTargetBuilder(approvalsGenerationStep, ApprovalsGenerationFunctions.GenerateServiceAccountApprovals));
 
-
+            requestIntakeStep
+               .OnEvent(RequestIntakeEvents.UserAccountRequestFormComplete)
+               .SendEventTo(new ProcessFunctionTargetBuilder(approvalsGenerationStep, ApprovalsGenerationFunctions.GenerateUserAccountApprovals));
 
             // Build the process to get a handle that can be started
             KernelProcess kernelProcess = process.Build();

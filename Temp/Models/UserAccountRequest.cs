@@ -10,7 +10,7 @@ namespace Temp.Models
 {
     public class UserAccountRequest
     {
-        Guid Id { get; set; } = Guid.NewGuid();
+        public Guid Id { get; set; } = Guid.NewGuid();
 
         [JsonPropertyName("accountName")]
         public string AccountName { get; set; } = string.Empty;
@@ -37,6 +37,10 @@ namespace Temp.Models
 
             foreach (PropertyInfo property in properties)
             {
+                // Exclude Id from being copied
+                if (property.Name == nameof(Id))
+                    continue;
+
                 // Get the value of the property  
                 string? value = property.GetValue(this) as string;
 

@@ -1,5 +1,6 @@
 ﻿using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.Process.Runtime;
+using Temp.Models;
 using Temp.Steps;
 using Temp.Steps.Events;
 using Temp.Steps.Functions;
@@ -8,8 +9,12 @@ namespace Temp
 {
     public class Program
     {
+        public static List<ServiceAccountRequest> ServiceAccountRequests = new();
+        public static List<UserAccountRequest> UserAccountRequests = new();
+
         static async Task Main(string[] args)
         {
+
             // Create a google kernel 
             var kernelBuilder = Kernel.CreateBuilder()
             .AddGoogleAIGeminiChatCompletion(modelId: "gemini-2.5-flash", apiKey: "");
@@ -73,6 +78,8 @@ namespace Temp
             requestIntakeStep
                .OnEvent(RequestIntakeEvents.UserAccountRequestFormNeedsMoreDetails)
                .SendEventTo(new ProcessFunctionTargetBuilder(displayRequestIntakeAssistantMessageStep, DisplayAssistantMessageFunctions.ShowOnConsole));
+
+
 
 
             // Build the process to get a handle that can be started

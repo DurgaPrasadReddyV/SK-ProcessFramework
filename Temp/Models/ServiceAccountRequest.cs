@@ -10,6 +10,8 @@ namespace Temp.Models
 {
     public class ServiceAccountRequest
     {
+        Guid Id { get; set; } = Guid.NewGuid();
+
         [JsonPropertyName("accountName")]
         public string AccountName { get; set; } = string.Empty;
 

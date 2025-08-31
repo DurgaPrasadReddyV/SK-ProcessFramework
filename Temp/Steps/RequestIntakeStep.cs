@@ -127,6 +127,7 @@ public class RequestIntakeStep : KernelProcessStep<RequestIntakeState>
 
         if (_state?.ServiceAccountRequest != null && _state.ServiceAccountRequest.IsFormCompleted())
         {
+            Program.ServiceAccountRequests.Add(_state.ServiceAccountRequest);
             Console.WriteLine($"[SERVICE_ACCOUNT_REQUEST_FORM_COMPLETED]: {JsonSerializer.Serialize(_state?.ServiceAccountRequest)}");
             // All user information is gathered to proceed to the next step
             await context.EmitEventAsync(new() { Id = RequestIntakeEvents.ServiceAccountRequestFormComplete, Data = _state?.ServiceAccountRequest, Visibility = KernelProcessEventVisibility.Public });
@@ -184,6 +185,7 @@ public class RequestIntakeStep : KernelProcessStep<RequestIntakeState>
 
         if (_state?.UserAccountRequest != null && _state.UserAccountRequest.IsFormCompleted())
         {
+            Program.UserAccountRequests.Add(_state.UserAccountRequest);
             Console.WriteLine($"[USER_ACCOUNT_REQUEST_FORM_COMPLETED]: {JsonSerializer.Serialize(_state?.UserAccountRequest)}");
             // All user information is gathered to proceed to the next step
             await context.EmitEventAsync(new() { Id = RequestIntakeEvents.UserAccountRequestFormComplete, Data = _state?.UserAccountRequest, Visibility = KernelProcessEventVisibility.Public });

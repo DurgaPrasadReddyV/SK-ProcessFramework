@@ -22,7 +22,7 @@ namespace Temp
             // Create a google kernel 
             var kernelBuilder = Kernel.CreateBuilder()
             .AddGoogleAIGeminiChatCompletion(modelId: "gemini-2.5-flash", apiKey: "AIzaSyCkJtgisAk8poC_Ej9ydrPBAENYdDXRjcM");
-            Kernel kernel = kernelBuilder.Build();
+            _kernel = kernelBuilder.Build();
 
             ProcessBuilder process = new("ActiveDirectoryProvisioning");
             var welcomeStep = process.AddStepFromType<WelcomeStep>();

@@ -406,6 +406,10 @@ public class RequestIntakeStep : KernelProcessStep<RequestIntakeState>
 
         foreach (var property in properties)
         {
+            // Exclude Id from being shown
+            if (property.Name == "Id")
+                continue;
+
             string propertyName = property.Name;
             string propertyType = property.PropertyType.Name;
 

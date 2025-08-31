@@ -242,15 +242,6 @@ public class RequestIntakeStep : KernelProcessStep<RequestIntakeState>
     }
     #endregion
 
-    [Description("User provided details of app name")]
-    private void SetServiceAppName(string appName)
-    {
-        if (!string.IsNullOrEmpty(appName) && _state != null)
-        {
-            _state.ServiceAccountRequest.AppName = appName;
-        }
-    }
-
     private async Task ProcessUserAccountRequestAsync(KernelProcessStepContext context, Kernel _kernel)
     {
         Kernel kernel = CreateUserAccountRequestFormKernel(_kernel);
@@ -406,6 +397,10 @@ public class RequestIntakeStep : KernelProcessStep<RequestIntakeState>
 
         foreach (var property in properties)
         {
+            // Exclude Id from being shown
+            if (property.Name == "Id")
+                continue;
+
             string propertyName = property.Name;
             string propertyType = property.PropertyType.Name;
 

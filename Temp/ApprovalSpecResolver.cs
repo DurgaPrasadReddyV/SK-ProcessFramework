@@ -28,7 +28,7 @@ namespace Temp
                 if (string.IsNullOrWhiteSpace(approver))
                     throw new InvalidOperationException($"Could not resolve selector '{s.Selector}' for role '{s.Role}'.");
                 
-                required.Add(new Approval() { Id = req.Id, Approver = approver, Role = s.Role});
+                required.Add(new Approval() { RequestId = req.Id, Approver = approver, Role = s.Role});
             }
 
             return new ApprovalSpec(req.Id, required);
@@ -53,7 +53,7 @@ namespace Temp
                 if (string.IsNullOrWhiteSpace(approver))
                     throw new InvalidOperationException($"Could not resolve selector '{s.Selector}' for role '{s.Role}'.");
 
-                required.Add(new Approval() { Id = req.Id, Approver = approver, Role = s.Role });
+                required.Add(new Approval() { RequestId = req.Id, Approver = approver, Role = s.Role });
             }
 
             return new ApprovalSpec(req.Id, required);

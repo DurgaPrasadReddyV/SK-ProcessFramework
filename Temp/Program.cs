@@ -70,6 +70,10 @@ namespace Temp
                .OnEvent(RequestIntakeEvents.ServiceAccountRequestFormNeedsMoreDetails)
                .SendEventTo(new ProcessFunctionTargetBuilder(displayRequestIntakeAssistantMessageStep, DisplayAssistantMessageFunctions.ShowOnConsole));
 
+            requestIntakeStep
+               .OnEvent(RequestIntakeEvents.UserAccountRequestFormNeedsMoreDetails)
+               .SendEventTo(new ProcessFunctionTargetBuilder(displayRequestIntakeAssistantMessageStep, DisplayAssistantMessageFunctions.ShowOnConsole));
+
 
             // Build the process to get a handle that can be started
             KernelProcess kernelProcess = process.Build();

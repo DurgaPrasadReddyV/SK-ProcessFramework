@@ -12,5 +12,8 @@ namespace Temp.Steps.Events
         public static readonly string ServiceAccountRequestFormComplete = nameof(ServiceAccountRequestFormComplete);
         public static readonly string ServiceAccountRequestFormNeedsMoreDetails = nameof(ServiceAccountRequestFormNeedsMoreDetails);
         public static readonly string ServiceAccountRequestCustomerInteractionTranscriptReady = nameof(ServiceAccountRequestCustomerInteractionTranscriptReady);
+        public static readonly string UserAccountRequestFormComplete = nameof(UserAccountRequestFormComplete);
+        public static readonly string UserAccountRequestFormNeedsMoreDetails = nameof(UserAccountRequestFormNeedsMoreDetails);
+        public static readonly string UserAccountRequestCustomerInteractionTranscriptReady = nameof(UserAccountRequestCustomerInteractionTranscriptReady);
     }
 }

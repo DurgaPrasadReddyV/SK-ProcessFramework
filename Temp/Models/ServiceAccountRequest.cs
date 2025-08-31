@@ -15,6 +15,21 @@ namespace Temp.Models
         [JsonPropertyName("accountName")]
         public string AccountName { get; set; } = string.Empty;
 
+        [JsonPropertyName("appName")]
+        public string AppName { get; set; } = string.Empty;
+
+        [JsonPropertyName("domainName")]
+        public string DomainName { get; set; } = string.Empty;
+
+        [JsonPropertyName("resourceIdentityName")]
+        public string ResourceIdentityName { get; set; } = string.Empty;
+
+        [JsonPropertyName("passwordNeverExpires")]
+        public string PasswordNeverExpires { get; set; } = "false";
+
+        [JsonPropertyName("passwordToBeVaulted")]
+        public string PasswordToBeVaulted { get; set; } ="false";
+
         public ServiceAccountRequest CopyWithDefaultValues(string defaultStringValue = "Unanswered")
         {
             ServiceAccountRequest copy = new();
@@ -41,7 +56,7 @@ namespace Temp.Models
 
         public bool IsFormCompleted()
         {
-            return !string.IsNullOrEmpty(AccountName);
+            return !string.IsNullOrEmpty(AccountName) && !string.IsNullOrEmpty(AppName) && !string.IsNullOrEmpty(DomainName) && !string.IsNullOrEmpty(ResourceIdentityName);
         }
     }
 }

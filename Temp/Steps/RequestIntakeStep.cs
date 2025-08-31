@@ -138,12 +138,18 @@ public class RequestIntakeStep : KernelProcessStep<RequestIntakeState>
         await context.EmitEventAsync(new() { Id = RequestIntakeEvents.ServiceAccountRequestFormNeedsMoreDetails, Data = assistantResponse });
     }
 
+    #region CreateServiceAccountRequestFormKernel
     private Kernel CreateServiceAccountRequestFormKernel(Kernel _baseKernel)
     {
         // Creating another kernel that only makes use private functions to fill up the form
         Kernel kernel = new(_baseKernel.Services);
         kernel.ImportPluginFromFunctions("FillServiceAccountRequestForm", [
-        KernelFunctionFactory.CreateFromMethod(SetServiceAccountName, functionName: nameof(SetServiceAccountName))]);
+            KernelFunctionFactory.CreateFromMethod(SetServiceAccountName, functionName: nameof(SetServiceAccountName)),
+        KernelFunctionFactory.CreateFromMethod(SetServiceAppName, functionName: nameof(SetServiceAppName)),
+        KernelFunctionFactory.CreateFromMethod(SetDomainName, functionName: nameof(SetDomainName)),
+        KernelFunctionFactory.CreateFromMethod(SetResourceIdentityName, functionName: nameof(SetResourceIdentityName)),
+        KernelFunctionFactory.CreateFromMethod(SetPasswordNeverExpires, functionName: nameof(SetPasswordNeverExpires)),
+        KernelFunctionFactory.CreateFromMethod(SetPasswordToBeVaulted, functionName: nameof(SetPasswordToBeVaulted))]);
 
         return kernel;
     }
@@ -156,6 +162,85 @@ public class RequestIntakeStep : KernelProcessStep<RequestIntakeState>
             _state.ServiceAccountRequest.AccountName = accountName;
         }
     }
+
+    [Description("User provided details of PasswordNeverExpires")]
+    private void SetPasswordNeverExpires(string passwordNeverExpires)
+    {
+        if (_state != null)
+        {
+            _state.ServiceAccountRequest.PasswordNeverExpires = passwordNeverExpires;
+        }
+    }
+
+    [Description("User provided details of PasswordToBeVaulted")]
+    private void SetPasswordToBeVaulted(string passwordToBeVaulted)
+    {
+        if (_state != null)
+        {
+            _state.ServiceAccountRequest.PasswordToBeVaulted = passwordToBeVaulted;
+        }
+    }
+
+    [Description("User provided details of app name")]
+    private string SetServiceAppName(string appName)
+    {
+        if (!string.IsNullOrEmpty(appName) && _state != null)
+        {
+            var list = Seed.CreateBusinessApplications();
+            if (list.Any(m => m.Name.Equals(appName, StringComparison.OrdinalIgnoreCase)))
+            {
+                _state.ServiceAccountRequest.AppName = appName;
+                return $"AppName set to {appName}";
+            }
+            else
+            {
+                _state.ServiceAccountRequest.AppName = "";
+                return $"AppName '{appName}' does not exist in the system. Please provide a valid AppName.";
+            }
+        }
+        return "AppName is invalid";
+    }
+
+    [Description("User provided details of domain name")]
+    private string SetDomainName(string domainName)
+    {
+        if (!string.IsNullOrEmpty(domainName) && _state != null)
+        {
+            var list = Seed.SeedDirectoryDomains();
+            if (list.Any(m => m.DnsName.Equals(domainName, StringComparison.OrdinalIgnoreCase)))
+            {
+                _state.ServiceAccountRequest.DomainName = domainName;
+                return $"DomainName set to {domainName}";
+            }
+            else
+            {
+                _state.ServiceAccountRequest.DomainName = "";
+                return $"DomainName '{domainName}' does not exist in the system. Please provide a valid Domain Name.";
+            }
+        }
+        return "DomainName is invalid";
+    }
+
+    [Description("User provided details of resource identity name")]
+    private string SetResourceIdentityName(string resourceIdentityName)
+    {
+        if (!string.IsNullOrEmpty(resourceIdentityName) && _state != null)
+        {
+            var list = Seed.CreateBusinessAppResourceIdentities();
+            if (list.Any(m => m.Name.Equals(resourceIdentityName, StringComparison.OrdinalIgnoreCase)))
+            {
+                _state.ServiceAccountRequest.ResourceIdentityName = resourceIdentityName;
+                return $"ResourceIdentityName set to {resourceIdentityName}";
+            }
+            else
+            {
+                _state.ServiceAccountRequest.ResourceIdentityName = "";
+                return $"ResourceIdentityName '{resourceIdentityName}' does not exist in the system. Please provide a valid Name.";
+            }
+        }
+        return "ResourceIdentityName is invalid";
+    }
+    #endregion
 
     private async Task ProcessUserAccountRequestAsync(KernelProcessStepContext context, Kernel _kernel)
     {
@@ -201,7 +286,13 @@ public class RequestIntakeStep : KernelProcessStep<RequestIntakeState>
         // Creating another kernel that only makes use private functions to fill up the form
         Kernel kernel = new(_baseKernel.Services);
         kernel.ImportPluginFromFunctions("FillUserAccountRequestForm", [
-        KernelFunctionFactory.CreateFromMethod(SetUserAccountName, functionName: nameof(SetUserAccountName))]);
+        KernelFunctionFactory.CreateFromMethod(SetUserAccountName, functionName: nameof(SetUserAccountName)),
+        KernelFunctionFactory.CreateFromMethod(SetUserDomainName, functionName: nameof(SetUserDomainName)),
+        KernelFunctionFactory.CreateFromMethod(SetUserId, functionName: nameof(SetUserId)),
+         KernelFunctionFactory.CreateFromMethod(SetUserServiceAppName, functionName: nameof(SetUserServiceAppName)),
+          KernelFunctionFactory.CreateFromMethod(SetUserPasswordNeverExpires, functionName: nameof(SetUserPasswordNeverExpires)),
+            KernelFunctionFactory.CreateFromMethod(SetUserPasswordToBeVaulted, functionName: nameof(SetUserPasswordToBeVaulted))
+        ]);
 
         return kernel;
     }
@@ -213,6 +304,84 @@ public class RequestIntakeStep : KernelProcessStep<RequestIntakeState>
         {
             _state.UserAccountRequest.AccountName = accountName;
         }
+    }
+
+    [Description("User provided details of PasswordNeverExpires")]
+    private void SetUserPasswordNeverExpires(string passwordNeverExpires)
+    {
+        if (_state != null)
+        {
+            _state.UserAccountRequest.PasswordNeverExpires = passwordNeverExpires;
+        }
+    }
+
+    [Description("User provided details of PasswordToBeVaulted")]
+    private void SetUserPasswordToBeVaulted(string passwordToBeVaulted)
+    {
+        if (_state != null)
+        {
+            _state.UserAccountRequest.PasswordToBeVaulted = passwordToBeVaulted;
+        }
+    }
+
+    [Description("User provided details of app name")]
+    private string SetUserServiceAppName(string appName)
+    {
+        if (!string.IsNullOrEmpty(appName) && _state != null)
+        {
+            var list = Seed.CreateBusinessApplications();
+            if (list.Any(m => m.Name.Equals(appName, StringComparison.OrdinalIgnoreCase)))
+            {
+                _state.UserAccountRequest.AppName = appName;
+                return $"AppName set to {appName}";
+            }
+            else
+            {
+                _state.UserAccountRequest.AppName = "";
+                return $"AppName '{appName}' does not exist in the system. Please provide a valid AppName.";
+            }
+        }
+        return "AppName is invalid";
+    }
+
+    [Description("User provided details of domain name")]
+    private string SetUserDomainName(string domainName)
+    {
+        if (!string.IsNullOrEmpty(domainName) && _state != null)
+        {
+            var list = Seed.SeedDirectoryDomains();
+            if (list.Any(m => m.DnsName.Equals(domainName, StringComparison.OrdinalIgnoreCase)))
+            {
+                _state.UserAccountRequest.DomainName = domainName;
+                return $"DomainName set to {domainName}";
+            }
+            else
+            {
+                _state.UserAccountRequest.DomainName = "";
+                return $"DomainName '{domainName}' does not exist in the system. Please provide a valid Domain Name.";
+            }
+        }
+        return "DomainName is invalid";
+    }
+
+    [Description("User provided details of user id")]
+    private string SetUserId(string userId)
+    {
+        if (!string.IsNullOrEmpty(userId) && _state != null)
+        {
+            var list = Seed.CreateHumanIdentities();
+            if (list.Any(m => m.UserId.Equals(userId, StringComparison.OrdinalIgnoreCase)))
+            {
+                _state.UserAccountRequest.UserId = userId;
+                return $"UserId set to {userId}";
+            }
+            else
+            {
+                _state.UserAccountRequest.UserId = "";
+                return $"userId '{userId}' does not exist in the system. Please provide a valid userId.";
+            }
+        }
+        return "UserId is invalid";
     }
 
     private readonly JsonSerializerOptions _jsonOptions = new()
